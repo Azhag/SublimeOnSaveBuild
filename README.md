@@ -44,6 +44,9 @@ Set to `1` to trigger a build on save. By default, this is set to `1`. I.e., Sub
 * **filename_filter**
 SublimeOnSaveBuild matches the name of the file being saved against this regular expression to determine if a build should be triggered. By default, the setting has a value of `"\\.(css|js|sass|less|scss)$"`.
 
+* **show_build_window_on_failure_only**
+Set to `1` if you want the build window to display only upon a failed build.  The default setting is `1`.  This setting can be configured on a project level.
+
 Usage
 -----
 1. Make sure you have a build operation set up in your Sublime Text 2 project and you are able to build using `Control+B` (Linux/Windows) or `Command+B` (OS X).
