@@ -16,7 +16,7 @@ class SublimeOnSaveBuild(sublime_plugin.EventListener):
         filename_filter = view.settings().get('filename_filter', global_settings.get('filename_filter', '*'))
 
         # Check if we should automatically hide the build window 
-        show_build_window_on_failure_only = view.settings().get('show_build_window_on_failure_only', global_settings.get('auto_hide_build_window', True))
+        auto_hide_build_window = view.settings().get('auto_hide_build_window', global_settings.get('auto_hide_build_window', True))
 
         if not should_build:
             return
@@ -29,10 +29,8 @@ class SublimeOnSaveBuild(sublime_plugin.EventListener):
 
         view.window().run_command('build')
 
-        if show_build_window_on_failure_only:
+        if auto_hide_build_window:
             self.num_polls = 0
-            # immediately hide the 'exec' panel. Will show it again later if there were errors
-            view.window().run_command("hide_panel", {"panel": "output.exec"})
             # start polling for results every 100s
             self.poll_for_results(view)
 
@@ -41,13 +39,10 @@ class SublimeOnSaveBuild(sublime_plugin.EventListener):
 
         if build_finished:
             errors = self.output_view.find('Error', 0)
-            if errors != None:
-                view.window().run_command("show_panel", {"panel": "output.exec"})
+            if errors == None:
+                view.window().run_command("hide_panel", {"panel": "output.exec"})
         else:            
-            if self.num_polls < 50:
-                sublime.set_timeout(functools.partial(self.poll_for_results, view), 100)
-            else:
-                # show the window if the build took longer than the specified amount
-                view.window().run_command("show_panel", {"panel": "output.exec"})
+            if self.num_polls < 300:
+                sublime.set_timeout(functools.partial(self.poll_for_results, view), 200)
 
         self.num_polls += 1
