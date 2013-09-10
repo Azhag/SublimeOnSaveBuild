@@ -15,7 +15,7 @@ class SublimeOnSaveBuild(sublime_plugin.EventListener):
         # Load filename filter. Again, a project level setting takes precedence.
         filename_filter = view.settings().get('filename_filter', global_settings.get('filename_filter', '.*'))
 
-        # Check if we should automatically hide the build window 
+        # Check if we should automatically hide the build window
         auto_hide_build_window = view.settings().get('auto_hide_build_window', global_settings.get('auto_hide_build_window', True))
 
         if not should_build:
@@ -35,13 +35,15 @@ class SublimeOnSaveBuild(sublime_plugin.EventListener):
             self.poll_for_results(view)
 
     def poll_for_results(self, view):
-        build_finished = self.output_view.find('Finished', 0) != None
+        build_finished = (self.output_view.find('Finished', 0) != None) or (self.output_view.find('Done', 0) != None)
 
         if build_finished:
-            errors = self.output_view.find('Error', 0)
+            errors = (self.output_view.find('Error', 0) or self.output_view.find('error', 0))
             if errors == None:
                 view.window().run_command("hide_panel", {"panel": "output.exec"})
-        else:            
+            else:
+                view.window().run_command("show_panel", {"panel": "output.exec"})
+        else:
             if self.num_polls < 300:
                 sublime.set_timeout(functools.partial(self.poll_for_results, view), 200)
 
